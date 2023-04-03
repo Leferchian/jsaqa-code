@@ -1,22 +1,23 @@
-const { test, expect } = require("@playwright/test");
+const user = require('../user.js');
+const { test, expect  } = require("@playwright/test");
 
-test("test", async ({ page }) => {
-  // Go to https://netology.ru/free/management#/
-  await page.goto("https://netology.ru/free/management#/");
 
-  // Click a
-  await page.click("a");
-  await expect(page).toHaveURL("https://netology.ru/");
-
-  // Click text=Учиться бесплатно
-  await page.click("text=Учиться бесплатно");
-  await expect(page).toHaveURL("https://netology.ru/free");
-
-  page.click("text=Бизнес и управление");
-
-  // Click text=Как перенести своё дело в онлайн
-  await page.click("text=Как перенести своё дело в онлайн");
-  await expect(page).toHaveURL(
-    "https://netology.ru/programs/kak-perenesti-svoyo-delo-v-onlajn-bp"
-  );
+test ('successful login', async ({page}) => {
+  await page.goto("https://netology.ru/?modal=sign_in", {timeout : 1000000});
+  await page.click('[placeholder="Email"]');
+  await page.fill('[placeholder="Email"]',user.email);
+  await page.click('[placeholder="Пароль"]');
+  await page.fill('[placeholder="Пароль"]',user.password);
+  await page.click('[data-testid="login-submit-btn"]');
+  await expect(page).toHaveURL('https://netology.ru/profile');
+  await expect(page.locator('.src-components-pages-Profile-Programs--title--Kw5NH')).toHaveText('Мои курсы и профессии');
+});
+test ('unsuccessful login', async ({page}) => {
+  await page.goto("https://netology.ru/?modal=sign_in", {timeout : 600000});
+  await page.click('[placeholder="Email"]');
+  await page.fill('[placeholder="Email"]','qwerty@email.ru');
+  await page.click('[placeholder="Пароль"]');
+  await page.fill('[placeholder="Пароль"]','qwerty');
+  await page.click('[data-testid="login-submit-btn"]');
+  await expect(page.locator('[data-testid="login-error-hint"]')).toHaveText('Вы ввели неправильно логин или пароль');
 });
