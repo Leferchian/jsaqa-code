@@ -14,4 +14,11 @@ describe("Books names test suit", () => {
       "Гарри Поттер",
     ]);
   });
+
+  test("Equal books names should not sorted", () => {
+    expect(sorting.sortByName(["Властелин Колец", "Властелин Колец"])).toEqual([
+      "Властелин Колец",
+      "Властелин Колец",
+    ]);
+  });
 });
