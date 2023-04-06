@@ -1,18 +1,16 @@
 const puppeteer = require("puppeteer");
 const chai = require("chai");
 const expect = chai.expect;
-const { Given, When, Then, Before, After } = require("@cucumber/cucumber");
-const { clickElement, getText } = require("./lib/commands.js");
-var {setDefaultTimeout} = require('@cucumber/cucumber');
-setDefaultTimeout(60 * 1000);
+const { Given, When, Then, Before, After } = require("cucumber");
+const { clickElement, getText } = require("../../lib/commands.js");
 
-Before({timeout: 60000}, async function () {
+Before(async function () {
   const browser = await puppeteer.launch({ headless: false, slowMo: 50 });
   const page = await browser.newPage();
   this.browser = browser;
   this.page = page;
 });
-    
+
 After(async function () {
   if (this.browser) {
     await this.browser.close();
@@ -20,49 +18,37 @@ After(async function () {
 });
 
 Given("user is on {string} page", async function (string) {
-  return await this.page.goto(`http://qamid.tmweb.ru/client/index.php`, {
-    setTimeout: 60000,
+  return await this.page.goto(`http://${string}.tmweb.ru/client/index.php`, {
+    setTimeout: 20000,
   });
 });
 
-When("user chooses by {string}", {
-  timeout: 60 * 1000
-}, async function (string) {
-  await clickElement(this.page, string);
+When("user user is booking a movie ticket", async function () {
+  await clickElement(this.page, "[data-time-stamp='1646773200']");
+  await clickElement(this.page, "[data-seance-id='95']");
+  await clickElement(this.page, ".buying-scheme__wrapper > div:nth-of-type(1) > span:nth-of-type(4)");
+  await clickElement(this.page, ".acceptin-button");
 });
 
-When("user chooses movie {string}", async function (string) {
-  return await clickElement(this.page, string);
+When("user user is booking multiple tickets", async function () {
+  await clickElement(this.page, ".page-nav__day_chosen > .page-nav__day-number");
+  await clickElement(this.page, "[data-seance-id='92']");
+  await clickElement(this.page, ".buying-scheme__wrapper > div:nth-of-type(1) > span:nth-of-type(1)");
+  await clickElement(this.page, ".buying-scheme__wrapper > div:nth-of-type(1) > span:nth-of-type(2)");
+  await clickElement(this.page, ".acceptin-button");
 });
 
-When("user chooses seat {string}", async function (string) {
-  return await clickElement(this.page, string);
+When("user re-booking a booked movie ticket", async function () {
+  await clickElement(this.page, "[data-seance-id='93']");
+  await clickElement(this.page, "div:nth-of-type(7) > span:nth-of-type(5)");
 });
 
-When("user click {string}", async function (string) {
-  return await clickElement(this.page, string);
+Then("user sees the booking confirmation", async function () {
+  let actual = await getText(this.page, "p:nth-of-type(8)");
+  expect(actual).contain("Приятного просмотра!");
 });
 
-Then("user sees text {string}", async function (string) {
-  const actual = await getText(this.page, ".ticket__check-title");
-  const expected = await string;
-  expect(actual).contains(expected);
-});
-
-Then("user sees the header {string}", async function (string) {
-  const actual = await getText(this.page, "h2");
-  const expected = await string;
-  expect(actual).contains(expected);
-});
-
-Then("user sees {string} is gray", {
-  timeout: 60 * 1000
-}, async function (string) {
-
-  await clickElement(this.page, string);
-  await this.page.waitForNavigation(30000);
-  const isDisabled = await page.$eval("button", (button) => button.disabled);
-  await this.page.waitForNavigation(30000);
-
-  await expect(isDisabled).to.equal(true);
+Then("user sees disabled button", async function () {
+  let isDisabled = await this.page.$eval("button[disabled]", (el) => el.disabled);
+  expect(isDisabled).true;
 });
